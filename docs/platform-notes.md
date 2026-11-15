@@ -93,3 +93,18 @@
 | 正文 | `[data-testid=tweetTextarea_0]`，逐行 insertText + 回车 |
 | 视频 | `input[data-testid=fileInput]`（accept 含 video/mp4）；17:48 的视频可以挂上（账号有 Premium） |
 | 注意 | 不点 Post；关掉对话框会丢失 |
+
+## Instagram `www.instagram.com`（2026-11-15，第 4 期实测）
+
+| 项 | 做法 |
+|---|---|
+| 入口 | 左侧栏 `svg[aria-label="新帖子"]` → 菜单里的「帖子」（主页统计里也有「帖子」二字，要限定横坐标在侧栏内）；都用真实鼠标点击 |
+| 视频 | 弹窗里 `input[type=file][accept*=video]`；网页上传的视频一律按 Reels 发，第一次会弹「视频帖现在会以 Reels 的形式分享」，点「确定」 |
+| 比例 | 裁剪页左下 `svg[aria-label="选择“裁剪”"]` → 「原版」（默认 1:1 会把横屏裁成方形） |
+| 封面 | 编辑页「封面照片」的 `input[type=file][accept="image/jpeg,image/png"]`，用 `cover-16x9.jpg`；修剪默认整段，「打开声音」默认开 |
+| 配文 | `[role=dialog] [contenteditable=true]`，逐行 insertText + 回车，上限 2200 字，链接点不了；末尾 `#话题` 会弹联想框，点标题栏收起（按 Esc 会关掉整个弹窗） |
+| 定时 | 「定时发布内容」开关（`input[role=switch]`）→ 日期是月历（`[role=grid]` 里的 `gridcell` 按钮，「Next month」翻页）→ 时、分是 `role=spinbutton`（值在 `aria-valuenow`，不认 insertText，逐个按数字键）；打开后右上角「分享」变成「预设发布时间」 |
+| 上限 | 前端常量 `PolarisCreationConstants`：Reels 最长 1200 秒、文件最大 1GB |
+| 上传 | 点「分享」后才开始传：先 GET 查续传位置，再按 10MB 分块 POST（中间的 206 `PartialRequestError` 是正常的分块回应）；223MB 走代理约 7 分钟 |
+| 链接 | 自己主页 `/<用户名>/reels/`，逐条打开，配文第一行对上的就是；定时中的不在列表里 |
+| 注意 | **网页 bug**：查续传位置的返回已被 `PolarisInstajax` 解析成对象，上传代码又 `JSON.parse(String(e)).offset`，抛 `"[object Object]" is not valid JSON` 被吞，界面只说「无法分享帖子」，手动发也一样。适配器检测到这句代码还在时，把 `require('PolarisInstajax').get_UNTYPED` 对 `rupload_igvideo` 的返回转回字符串；补丁随页面存在，刷新页面要重新填 |
