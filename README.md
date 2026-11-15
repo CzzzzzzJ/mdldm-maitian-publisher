@@ -4,7 +4,7 @@
 
 # 麦田发布助手
 
-**麦田工作台的发布引擎：一期视频，一键填好 B 站、小红书、抖音、视频号、YouTube、X 六个平台；Obsidian 笔记，一键写进 X 长文。**
+**麦田工作台的发布引擎：一期视频，一键填好 B 站、小红书、抖音、视频号、YouTube、X、Instagram 七个平台；Obsidian 笔记，一键写进 X 长文。**
 
 只负责填写，最后的「发布」由你自己点。可以单独用，也可以交给 [麦田](https://github.com/CzzzzzzJ/mdldm-maitian) 定时调度、发完自动取链接、每天采数据。
 
@@ -40,11 +40,11 @@
 | 能力 | 说明 |
 | --- | --- |
 | 一个工程文件 | 每期视频一个目录：成片、封面、`publish.json`（各平台标题、正文、标签、用哪张封面） |
-| 六个平台一键填写 | 自动打开 B 站、小红书、抖音、视频号、YouTube、X 的上传页，传视频、传封面、填标题正文、选话题 |
+| 七个平台一键填写 | 自动打开 B 站、小红书、抖音、视频号、YouTube、X、Instagram 的上传页，传视频、传封面、填标题正文、选话题 |
 | 大文件直传 | 视频通过 Chrome 调试接口直接交本地路径，1.5GB 的成片也不卡 |
 | 发前校验 | 字数上限、必带标签、小红书/抖音/视频号不放链接和微信号，有问题先拦下 |
 | 等上传完再补封面 | 小红书、视频号要等视频传完才能改封面，插件在后台等着，传完自动补上 |
-| 定时发布 | `publish.json` 写上时间，六个平台的定时都会设好（B 站、小红书、抖音、视频号、YouTube、X） |
+| 定时发布 | `publish.json` 写上时间，七个平台的定时都会设好（B 站、小红书、抖音、视频号、YouTube、X、Instagram） |
 | 不打扰 | 上传页在后台打开，填写时不抢你正在看的页面；关掉面板也继续跑，工具栏图标显示进度，结束弹通知 |
 | 安全 | 只填写，**不会点发布**；每个平台一张状态卡，跳过了什么、哪里异常都写清楚 |
 
@@ -88,7 +88,7 @@
      成片.mp4
      封面/cover-3x4.png   竖：小红书、抖音竖封面、视频号个人主页卡片
      封面/cover-4x3.png   横：B 站、抖音横封面、视频号分享卡片
-     封面/cover-16x9.jpg  YouTube 缩略图
+     封面/cover-16x9.jpg  YouTube 缩略图、Instagram 封面
      publish.json
    ```
 
@@ -181,9 +181,10 @@ X 长文编辑器基于 Draft.js。插件用 `chrome.scripting.executeScript({ w
 - `sidepanel.*`：面板界面；`video.js`：视频分发页签
 - `lib/publish.js`：扫描工程、按平台调度、等上传完成
 - `lib/bundle.js`：`publish.json` 校验规则（`tools/validate.mjs` 是命令行版）
-- `lib/platforms/*.js`：B 站、小红书、抖音、视频号、YouTube、X 的适配器
+- `lib/platforms/*.js`：B 站、小红书、抖音、视频号、YouTube、X、Instagram 的适配器
 - `lib/cdp.js`：Chrome 调试接口驱动
 - `lib/devbridge.js`、`tools/`：开发用的本机桥接，只在「加载已解压的扩展程序」时启用
+- `tools/try-adapter.mjs`：在命令行里对真实上传页跑一个适配器的填写（`node --import ./tools/adapter-loader.mjs tools/try-adapter.mjs <平台> <工程目录>`；设 `CDP_PORT` 可直连带调试端口的 Chrome）
 - `lib/md.js`：Obsidian Markdown → 片段（测试：`node tests/md.test.mjs <笔记路径>`）
 - `lib/engine.js`：在编辑页里执行的插入引擎
 - `lib/vault.js`：读取本地库（File System Access API，授权句柄存在 IndexedDB）

@@ -9,6 +9,7 @@
 //   ## 六、视频号     **短标题：** / **描述：**
 //   ## 七、YouTube   **标题：** / **简介：** / **标签：**（逗号分隔）
 //   ## 八、X         整节就是推文
+//   ## 九、Instagram 整节就是配文（链接点不了，话题标签写在末尾）
 // 工程目录里：成片.mp4、封面/cover-3x4.png、cover-4x3.png、cover-16x9.jpg（有哪个用哪个）
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, basename, dirname } from 'node:path';
@@ -81,6 +82,8 @@ if ((s = sec('X'))) {
   platforms.x = m ? { covers: [], mode: 'article+quote', article: m[1], text: clean(s.replace(m[0], '').split('\n').filter(l => !/^>/.test(l)).join('\n')) } : { covers: [], text: clean(s) };
 }
 
+if ((s = sec('Instagram'))) platforms.instagram = { covers: pick('16x9', '4x3').slice(0, 1), ...(files.includes('成片-ig.mp4') ? { video: '成片-ig.mp4' } : {}), caption: clean(s.split('\n').filter(l => !/^>/.test(l)).join('\n')) };
+
 // 成片时长（秒）：有 ffprobe 就读出来，给需要时长的平台用
 let durationSec;
 if (video) {
@@ -118,6 +121,10 @@ if (existsSync(target)) {
 writeFileSync(target, JSON.stringify(out, null, 2) + '\n');
 
 const { errors, warnings } = validate(out, new Set(files));
+// Instagram 网页上传单个文件最大 1GB（PolarisCreationConstants.MAX_FILE_SIZE）：成片太大要先转一版
+if (out.platforms.instagram && !out.platforms.instagram.video && video && statSync(join(dir, video)).size > 1e9) {
+  warnings.push(`Instagram：成片 ${(statSync(join(dir, video)).size / 1e9).toFixed(2)}GB，超过网页上传 1GB 上限，先转一版放进工程目录（ffmpeg -i 成片.mp4 -r 30 -c:v h264_videotoolbox -b:v 5000k -c:a aac -b:a 128k -movflags +faststart 成片-ig.mp4），重新生成时会自动给 Instagram 用`);
+}
 console.log(`已写入 ${target}`);
 console.log(`平台：${Object.keys(platforms).join('、')}；封面：${Object.keys(covers).join(' / ')}；定时：${schedule || '无'}`);
 warnings.forEach(w => console.log(`⚠️  ${w}`));
