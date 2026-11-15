@@ -9,7 +9,7 @@ import { evaluate } from './cdp.mjs';
 
 const [mdPath, tabArg, settleArg] = process.argv.slice(2);
 if (!mdPath || !tabArg) { console.error('用法：node tools/article.mjs <笔记.md> <tabId> [settle秒]'); process.exit(2); }
-const tabId = +tabArg, settle = (+settleArg || 8) * 1000;
+const tabId = process.env.CDP_PORT ? tabArg : +tabArg, settle = (+settleArg || 8) * 1000;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const exec = (cmd, arg = null) => evaluate(tabId, `(${xEngine.toString()})(${JSON.stringify(cmd)}, ${JSON.stringify(arg)})`, 120000);
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' };
