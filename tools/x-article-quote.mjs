@@ -24,7 +24,15 @@ let notify = async (t) => log('[通知]', t);
 try { notify = (await import(join(HUB, 'src/feishu.mjs'))).notify; } catch {}
 async function waitFor(T, expr, ms, step = 1000) { const end = Date.now() + ms; while (Date.now() < end) { try { if (await evaluate(T, expr)) return true; } catch {} await sleep(step); } return false; }
 // 真实鼠标点击（X 不一定认 JS 的 el.click()，2026-11-14 第 4 期长文 Publish 就是这样没发出去）
-async function realClick(T, expr) { const r = await rectOf(T, expr); if (!r) return false; await clickAt(T, r.x, r.y); return true; }
+async function realClick(T, expr) { await clearOverlay(T, expr); const r = await rectOf(T, expr); if (!r) return false; await clickAt(T, r.x, r.y); return true; }
+// 别的插件（如 XHunt）会在 <html> 下挂一个透明的全屏层，挡住真实点击（2026-11-16 麦田开源期视频帖没点上）：
+// 按钮中心点命中的不是按钮本身时，把挡在上面的 html 顶层元素临时隐藏
+async function clearOverlay(T, expr) {
+  return evaluate(T, `(()=>{const b=(${expr}); if(!b) return 0; const r=b.getBoundingClientRect(); let n=0;
+    for (let i=0;i<5;i++){ const e=document.elementFromPoint(r.x+r.width/2, r.y+r.height/2); if(!e || b.contains(e)) break;
+      const top=[...document.documentElement.children].find(c=>c!==document.body && c.contains(e)) || (e.parentElement===document.documentElement && e!==document.body ? e : null);
+      if(!top) break; top.style.display='none'; n++; } return n})()`).catch(() => 0);
+}
 async function ensureBridge() {
   for (let i = 0; i < 6; i++) { try { await call({ op: 'ping' }); return; } catch { await sleep(10000); } }
   throw new Error('插件桥接没响应（侧边栏开着吗？）');
@@ -38,7 +46,7 @@ try {
   await ensureBridge();
   let C;
   if (RESUME) {
-    C = +args['post-tab'];
+    C = /^\d+$/.test(args['post-tab']) ? +args['post-tab'] : String(args['post-tab']);
     if (!await waitFor(C, `!!document.querySelector('[data-testid=tweetTextarea_0]') && !!document.querySelector('[data-testid=attachments]')`, 10000)) throw new Error('续发：发帖框里没有文案或视频');
     log('续发：用已填好的发帖框', C);
   } else {
@@ -82,7 +90,7 @@ try {
   const { existsSync, writeFileSync, mkdirSync } = await import('node:fs');
   if (existsSync(LOCK) && !RESUME) throw new Error(`锁文件已存在（${LOCK}），这篇长文之前已执行过发布，本次不再发`);
   mkdirSync(join(HUB, 'state'), { recursive: true }); writeFileSync(LOCK, new Date().toISOString());
-  A = args['article-tab'] ? +args['article-tab'] : await call({ op: 'open', url: args.draft });
+  A = args['article-tab'] ? (/^\d+$/.test(args['article-tab']) ? +args['article-tab'] : String(args['article-tab'])) : await call({ op: 'open', url: args.draft });
   if (RESUME) { await evaluate(A, `(location.href = ${JSON.stringify(args.draft)}, 1)`); await sleep(4000); }
   if (!await waitFor(A, `[...document.querySelectorAll('button')].some(b=>b.innerText.trim()==='Publish')`, 60000)) throw new Error('长文编辑页没有 Publish 按钮');
   const title = await evaluate(A, `(document.querySelector('textarea[placeholder="Add a title"]')?.value||'').trim()`);
