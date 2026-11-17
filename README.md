@@ -1,3 +1,5 @@
+> **👉 请从 [Chrome 应用商店安装麦田发布助手](https://chromewebstore.google.com/detail/eaaipbilkhibicihiollecmbpneikpnj)**，自动更新，不用下载代码、不用开开发者模式；配合 [麦田](https://github.com/CzzzzzzJ/mdldm-maitian) 使用时，安装向导会带你装。本仓库是源码，供开发参考。
+
 <div align="center">
 
 <img src="docs/readme/banner.png" alt="麦田发布助手 · 一期视频一键填好六个平台，只填写不发布" />
