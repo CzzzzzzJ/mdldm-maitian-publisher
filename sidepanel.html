@@ -28,11 +28,11 @@
           <button id="btnNasPick" class="ghost">选择</button>
         </div>
       </div>
-      <label class="opt path">本机路径 <input id="nasPath" type="text" spellcheck="false"></label>
+      <label class="opt path">本机路径 <input id="nasPath" type="text" spellcheck="false" placeholder="比如 /Users/你/Movies/视频导出"></label>
     </section>
 
     <section class="card">
-      <div class="label">发布工程 <span class="hint">目录里有 publish.json 的</span></div>
+      <div class="label">发布工程 <span class="hint">有 publish.json 的，或只放了成片的文件夹</span></div>
       <ul id="projects" class="notes"></ul>
     </section>
 
@@ -40,8 +40,16 @@
       <div id="projTitle" class="pv-title"></div>
       <div id="projMeta" class="pv-meta"></div>
       <ul id="projCheck" class="warn"></ul>
+      <div id="aiBox" class="ai">
+        <div class="row"><div class="label">✨ AI 写文案 <span class="hint">一次写好七个平台</span></div><button id="btnAiAccount" class="ghost small">连接知识站账号</button></div>
+        <div id="aiQuota" class="hint"></div>
+        <input id="aiTitle" type="text" placeholder="视频标题（可选）" spellcheck="false">
+        <textarea id="aiBrief" rows="5" placeholder="这期视频讲了什么？贴口播稿、字幕或几句要点（至少 20 字）。文件夹里有字幕 .srt 或口播稿会自动读进来。"></textarea>
+        <div class="buttons"><button id="btnAiGen">AI 写七个平台文案</button><button id="btnAiVip" class="ghost hidden">开通会员</button></div>
+        <ul id="aiMsg" class="warn"></ul>
+      </div>
       <ul id="platList" class="plats"></ul>
-      <div class="buttons">
+      <div class="buttons" id="projButtons">
         <button id="btnCheck" class="ghost" disabled>检查登录</button>
         <button id="btnLinks" class="ghost" disabled>回填链接</button>
         <button id="btnPublish" class="primary" disabled>一键填写所选平台</button>
