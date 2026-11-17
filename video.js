@@ -2,10 +2,11 @@
 import { idbGet, idbSet } from './lib/vault.js';
 import { scanProjects, check, ORDER } from './lib/publish.js';
 import { PLATFORMS } from './lib/bundle.js';
+import * as ai from './lib/aicopy.js';
 
 const $ = (id) => document.getElementById(id);
 const KEY = 'nasRoot', PATH_KEY = 'nasPath';
-const DEFAULT_PATH = '/Volumes/sata11-176XXXX6901/视频导出';
+const DEFAULT_PATH = '';   // 本机路径由用户自己填（只用于把文件交给上传框）
 
 let root = null;        // NAS 目录句柄
 let projects = [];
@@ -32,11 +33,13 @@ async function loadRoot(handle) {
 
 function renderProjects() {
   $('projects').innerHTML = '';
-  if (!projects.length) { $('projects').innerHTML = '<li class="p">这个目录下没有找到 publish.json</li>'; return; }
+  if (!projects.length) { $('projects').innerHTML = '<li class="p">这个目录下没有找到 publish.json，也没有放了成片的子文件夹</li>'; return; }
   for (const pr of projects) {
     const li = el('li');
     if (current && current.project.dir === pr.dir) li.classList.add('active');
-    li.append(el('div', 'n', pr.data ? pr.data.name : pr.dir), el('div', 'p', pr.error || pr.dir));
+    const n = el('div', 'n', pr.data ? pr.data.name : pr.dir);
+    if (pr.draft) n.append(el('span', 'tag', '待写文案'));
+    li.append(n, el('div', 'p', pr.error || (pr.draft ? `${pr.dir} · ${pr.video}` : pr.dir)));
     li.onclick = () => selectProject(pr);
     $('projects').appendChild(li);
   }
@@ -46,6 +49,10 @@ function renderProjects() {
 async function selectProject(pr) {
   if (running) return;
   if (pr.error) { alert(pr.error); return; }
+  aiReset(pr);
+  if (pr.draft) return selectDraft(pr);
+  ['platList'].forEach(id => $(id).classList.remove('hidden'));
+  $('projButtons').classList.remove('hidden');
   const result = await check(pr);
   current = { project: pr, result };
   renderProjects();
@@ -76,6 +83,72 @@ async function selectProject(pr) {
   $('btnPublish').disabled = running || !!result.errors.length;
   $('btnCheck').disabled = running;
   $('btnLinks').disabled = running;
+}
+
+// ---------- 草稿：只有成片，还没有 publish.json ----------
+function selectDraft(pr) {
+  current = { project: pr, result: { errors: ['还没有发布文案'], warnings: [] } };
+  renderProjects();
+  $('projCard').classList.remove('hidden');
+  $('projTitle').textContent = pr.dir.split('/').pop();
+  $('projMeta').textContent = `${pr.dir} · 视频 ${pr.video} · 还没有 publish.json`;
+  $('projCheck').innerHTML = '';
+  $('projCheck').appendChild(el('li', 'info', '用下面的「AI 写文案」生成七个平台的文案，会在这个文件夹里新建 publish.json。封面按图片比例自动识别（3:4、4:3、16:9）。'));
+  $('platList').classList.add('hidden');
+  $('projButtons').classList.add('hidden');
+}
+
+// ---------- AI 写文案 ----------
+let aiBusy = false, aiConnecting = false;
+async function aiRefresh() {
+  const acc = await ai.account();
+  $('btnAiAccount').textContent = acc ? '断开' : '连接知识站账号';
+  if (!acc) { $('aiQuota').textContent = '连接知识站账号后可用：新用户免费 3 次，会员每月 100 次。插件拿不到你的 AI Key。'; return; }
+  const q = await ai.quota().catch(() => null);
+  if (!q) { $('aiQuota').textContent = (await ai.account()) ? `已连接 ${acc.name}（额度暂时查不到）` : '连接已失效，重新连接一下'; $('btnAiAccount').textContent = (await ai.account()) ? '断开' : '连接知识站账号'; return; }
+  const left = q.vip ? `会员本月还剩 ${q.vip_left} 次` : `免费还剩 ${q.free_left} 次`;
+  $('aiQuota').textContent = `已连接 ${q.account_name} · ${left}${!q.vip && !q.free_left ? (q.pay_with_balance ? ' · 之后按次扣 AI 余额' : '') : ''}`;
+  $('btnAiVip').classList.toggle('hidden', q.vip || q.free_left > 0);
+  if (q.vip_url) $('btnAiVip').dataset.url = q.vip_url;
+}
+async function aiReset(pr) {
+  $('aiMsg').innerHTML = '';
+  $('aiTitle').value = pr.data ? pr.data.name || '' : '';
+  $('aiBrief').value = '';
+  try { $('aiBrief').value = await ai.readBrief(pr.handle); } catch { /* 没有可读的素材 */ }
+}
+function aiNote(text, cls = '') { $('aiMsg').appendChild(el('li', cls, text)); }
+async function aiAccount() {
+  if (await ai.account()) { await ai.disconnect(); return aiRefresh(); }
+  if (aiConnecting) return;
+  aiConnecting = true; $('aiMsg').innerHTML = '';
+  try {
+    await ai.connect({ onCode: (code) => aiNote(`已在新标签页打开知识站：登录后核对授权码 ${code}，点「授权并连接」`, 'info') });
+    $('aiMsg').innerHTML = ''; aiNote('✅ 已连接', 'ok');
+  } catch (e) { aiNote(`❌ ${e.message}`); }
+  finally { aiConnecting = false; aiRefresh(); }
+}
+async function aiGenerate() {
+  if (aiBusy || running || !current) return;
+  const brief = $('aiBrief').value.trim();
+  if ([...brief].length < 20) { $('aiMsg').innerHTML = ''; aiNote('❌ 先写几句这期视频讲了什么（至少 20 字）'); return; }
+  if (!(await ai.account())) return aiAccount();
+  if ((await root.requestPermission({ mode: 'readwrite' })) !== 'granted') { aiNote('❌ 需要允许写入这个文件夹，才能保存 publish.json'); return; }
+  aiBusy = true; $('btnAiGen').disabled = true; $('btnAiGen').textContent = 'AI 正在写…（约 10 秒）'; $('aiMsg').innerHTML = '';
+  try {
+    const pr = current.project;
+    const r = await ai.generate({ brief, title: $('aiTitle').value.trim() });
+    await ai.writeProject(pr.handle, pr.data || null, r.platforms, { title: $('aiTitle').value.trim() });
+    aiNote(`✅ 已写进 ${pr.dir}/publish.json${pr.data ? '（旧文件留在 publish.json.bak）' : ''}，下面可以检查、改字、再一键填写`, 'ok');
+    (r.problems || []).forEach(p => aiNote(`⚠️ ${p}，填写前改一下`, 'info'));
+    const dir = pr.dir; await loadRoot(root);
+    const again = projects.find(p => p.dir === dir); if (again) { const msgs = $('aiMsg').innerHTML; await selectProject(again); $('aiMsg').innerHTML = msgs; }
+  } catch (e) {
+    aiNote(`❌ ${e.message}`);
+    if (e.vipUrl) { $('btnAiVip').dataset.url = e.vipUrl; $('btnAiVip').classList.remove('hidden'); }
+  } finally {
+    aiBusy = false; $('btnAiGen').disabled = false; $('btnAiGen').textContent = 'AI 写七个平台文案'; aiRefresh();
+  }
 }
 
 // ---------- 状态卡 ----------
@@ -212,6 +285,10 @@ export async function initVideo() {
   $('btnPublish').onclick = publish;
   $('btnCheck').onclick = checkLogins;
   $('btnLinks').onclick = backfillLinks;
+  $('btnAiAccount').onclick = aiAccount;
+  $('btnAiGen').onclick = aiGenerate;
+  $('btnAiVip').onclick = () => chrome.tabs.create({ url: $('btnAiVip').dataset.url || ai.SITE, active: true });
+  aiRefresh();
   $('btnPubStop').onclick = () => chrome.runtime.sendMessage({ type: 'publish:stop' });
   chrome.runtime.onMessage.addListener((msg) => { if (msg.type === 'job') renderJob(msg.job); });
   renderJob(await chrome.runtime.sendMessage({ type: 'publish:get' }));
