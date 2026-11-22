@@ -1,4 +1,6 @@
 > **👉 请从 [Chrome 应用商店安装麦田发布助手](https://chromewebstore.google.com/detail/eaaipbilkhibicihiollecmbpneikpnj)**，自动更新，不用下载代码、不用开开发者模式；配合 [麦田](https://github.com/CzzzzzzJ/mdldm-maitian) 使用时，安装向导会带你装。本仓库是源码，供开发参考。
+>
+> 本仓库停在 0.5.1（MIT，继续可用）。商店版免费、持续更新；之后新版本的源码在会员仓库更新。
 
 <div align="center">
 
