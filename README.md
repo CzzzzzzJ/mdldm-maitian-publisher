@@ -1,31 +1,31 @@
-> **👉 请从 [Chrome 应用商店安装麦田发布助手](https://chromewebstore.google.com/detail/eaaipbilkhibicihiollecmbpneikpnj)**，自动更新，不用下载代码、不用开开发者模式；配合 [麦田](https://github.com/CzzzzzzJ/mdldm-maitian) 使用时，安装向导会带你装。本仓库是源码，供开发参考。
+> **👉 请从 [Chrome 应用商店安装 howieip-studio 发布助手](https://chromewebstore.google.com/detail/eaaipbilkhibicihiollecmbpneikpnj)**，自动更新，不用下载代码、不用开开发者模式；配合 [howieip-studio](https://github.com/CzzzzzzJ/mdldm-maitian) 使用时，安装向导会带你装。本仓库是源码，供开发参考。
 
 <div align="center">
 
-<img src="docs/readme/banner.png" alt="麦田发布助手 · 一期视频一键填好六个平台，只填写不发布" />
+<img src="docs/readme/banner.png" alt="howieip-studio 发布助手 · 一期视频一键填好六个平台，只填写不发布" />
 
-# 麦田发布助手
+# howieip-studio 发布助手
 
-**麦田工作台的发布引擎：一期视频，一键填好 B 站、小红书、抖音、视频号、YouTube、X、Instagram 七个平台；Obsidian 笔记，一键写进 X 长文。**
+**howieip-studio 工作台的发布引擎：一期视频，一键填好 B 站、小红书、抖音、视频号、YouTube、X、Instagram 七个平台；Obsidian 笔记，一键写进 X 长文。**
 
-只负责填写，最后的「发布」由你自己点。可以单独用，也可以交给 [麦田](https://github.com/CzzzzzzJ/mdldm-maitian) 定时调度、发完自动取链接、每天采数据。
+只负责填写，最后的「发布」由你自己点。可以单独用，也可以交给 [howieip-studio](https://github.com/CzzzzzzJ/mdldm-maitian) 定时调度、发完自动取链接、每天采数据。
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Manifest%20V3-2f6bff.svg)](manifest.json)
 [![Version](https://img.shields.io/badge/version-0.3.1-ffd43b.svg)](manifest.json)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/CzzzzzzJ/mdldm-maitian-publisher?style=social)](https://github.com/CzzzzzzJ/mdldm-maitian-publisher/stargazers)
 
-[安装](#安装) · [和麦田一起用](#和麦田一起用) · [视频多平台分发](#视频多平台分发) · [X 长文](#x-长文使用) · [原理](#原理和踩过的坑)
+[安装](#安装) · [和 howieip-studio 一起用](#和 howieip-studio 一起用) · [视频多平台分发](#视频多平台分发) · [X 长文](#x-长文使用) · [原理](#原理和踩过的坑)
 
-[麦田工作台](https://github.com/CzzzzzzJ/mdldm-maitian) · [X / Twitter](https://x.com/czzzzzzJ_) · [联系作者](#联系作者)
+[howieip-studio 工作台](https://github.com/CzzzzzzJ/mdldm-maitian) · [联系作者](#联系作者)
 
 </div>
 
 > [!TIP]
-> **想系统学会用 AI 做这类小工具？** 这个插件是我用 Claude Code 做出来的。从 0 基础到用 AI 做出自己的产品，完整课程和每周直播都在 👉 **[麦当的知识站 mdldm.club](https://www.mdldm.club/ai-course-promotion?utm_source=github&utm_medium=readme&utm_campaign=publisher)**
+> **想系统学会用 AI 做这类小工具？** 这个插件在上游开源项目上由 Howie 继续改造。课程和直播见 **[知识站 mdldm.club](https://www.mdldm.club/ai-course-promotion?utm_source=github&utm_medium=readme&utm_campaign=publisher)**
 
-<p align="center"><img src="https://github.com/CzzzzzzJ/mdldm-maitian/releases/download/media/maitian-publish.gif" alt="一期视频的完整发布流程：Agent 写文案 → 麦田排期 → 插件分批填写各平台 → 国内平台你来点发布" /></p>
-<p align="center"><sub>和麦田一起用的完整流程（各平台页面为示意，<a href="https://github.com/CzzzzzzJ/mdldm-maitian/releases/download/media/maitian-publish.mp4">高清 MP4</a>）</sub></p>
+<p align="center"><img src="https://github.com/CzzzzzzJ/mdldm-maitian/releases/download/media/maitian-publish.gif" alt="一期视频的完整发布流程：Agent 写文案 → howieip-studio 排期 → 插件分批填写各平台 → 国内平台你来点发布" /></p>
+<p align="center"><sub>和 howieip-studio 一起用的完整流程（各平台页面为示意，<a href="https://github.com/CzzzzzzJ/mdldm-maitian/releases/download/media/maitian-publish.mp4">高清 MP4</a>）</sub></p>
 
 <details>
 <summary>只看插件面板的操作演示</summary>
@@ -67,19 +67,19 @@
 1. 下载本仓库：`git clone https://github.com/CzzzzzzJ/mdldm-maitian-publisher.git`，或点右上角 **Code → Download ZIP** 后解压
 2. Chrome 打开 `chrome://extensions`，打开右上角「开发者模式」
 3. 点「加载已解压的扩展程序」，选择仓库文件夹
-4. 点工具栏的拼图图标，把「麦田发布助手」固定出来
+4. 点工具栏的拼图图标，把「howieip-studio 发布助手」固定出来
 
-## 和麦田一起用
+## 和 howieip-studio 一起用
 
-[麦田](https://github.com/CzzzzzzJ/mdldm-maitian) 是一套给多平台博主的开源工作台：分发和定时、各平台数据留存和大屏、接入你自己的站点看转化。三者分工：
+[howieip-studio](https://github.com/CzzzzzzJ/mdldm-maitian) 是一套给多平台博主的开源工作台：分发和定时、各平台数据留存和大屏、接入你自己的站点看转化。三者分工：
 
 | 部分 | 做什么 |
 | --- | --- |
-| 发布 skill（在麦田仓库 `skills/`） | 让 AI 助手看片、写各平台文案、生成 `publish.json` 并校验 |
-| **麦田发布助手（本仓库）** | 各平台适配器：打开上传页、传视频和封面、填文案、设定时 |
-| 麦田 | 什么时候跑、跑到哪、防重、到点取链接、每天采数据、飞书通知 |
+| 发布 skill（在 howieip-studio 仓库 `skills/`） | 让 AI 助手看片、写各平台文案、生成 `publish.json` 并校验 |
+| **howieip-studio 发布助手（本仓库）** | 各平台适配器：打开上传页、传视频和封面、填文案、设定时 |
+| howieip-studio | 什么时候跑、跑到哪、防重、到点取链接、每天采数据、飞书通知 |
 
-麦田直接加载本仓库的 `lib/`（在 `config.json` 的 `pluginDir` 填本仓库路径），所以平台改版只需要更新这一个仓库。单独用插件时，按下面「视频多平台分发」在侧边栏里操作即可。
+howieip-studio 直接加载本仓库的 `lib/`（在 `config.json` 的 `pluginDir` 填本仓库路径），所以平台改版只需要更新这一个仓库。单独用插件时，按下面「视频多平台分发」在侧边栏里操作即可。
 
 ## 视频多平台分发
 
@@ -95,7 +95,7 @@
    ```
 
    `publish.json` 的格式见 [docs/multi-platform-design.md](docs/multi-platform-design.md)。也可以从发布素材 md 直接生成：`node tools/make-publish.mjs <发布素材.md> <工程目录>`（会顺带校验）
-2. 先在 Chrome 里登录好各个平台的创作者后台
+2. 先在 egolite 里登录好各个平台的创作者后台
 3. 打开插件面板，切到「视频分发」，点「选择」选中「视频导出」文件夹，并填好它在本机的绝对路径
 4. 点一期工程，看校验结果，勾选要发的平台，点「一键填写所选平台」
 5. 插件在后台依次打开各平台上传页并填写，你可以关掉面板去做别的。工具栏图标会显示进度，结束时弹通知
@@ -193,22 +193,22 @@ X 长文编辑器基于 Draft.js。插件用 `chrome.scripting.executeScript({ w
 
 ## 联系作者
 
-<p align="center"><a href="https://www.mdldm.club/ai-course-promotion?utm_source=github&utm_medium=readme&utm_campaign=publisher"><img src="docs/readme/author.png" alt="麦当 mdldm · 0 基础 AI Agent 教学博主 · mdldm.club 知识站" /></a></p>
+<p align="center"><a href="https://www.mdldm.club/ai-course-promotion?utm_source=github&utm_medium=readme&utm_campaign=publisher"><img src="docs/readme/author.png" alt="Howie · howieip-studio" /></a></p>
 
-本项目由 **麦当mdldm** 开发，是我「一人公司」内容工作流里的一环。
+本版本由 **Howie** 在上游开源项目上继续改造。
 
-- **想学会用 AI 做出自己的工具和产品**：访问 👉 [**麦当的知识站 mdldm.club**](https://www.mdldm.club/ai-course-promotion?utm_source=github&utm_medium=readme&utm_campaign=publisher)。0 基础 AI Agent / Vibe Coding 系列课、每周会员直播、答疑群都在这里
-- **想搭一个自己的知识付费站**：看我开源的 [mdldm Knowledge Kit](https://github.com/CzzzzzzJ/mdldm-knowledge-kit)
+- **想学会用 AI 做出自己的工具和产品**：访问 👉 [**知识站 mdldm.club**](https://www.mdldm.club/ai-course-promotion?utm_source=github&utm_medium=readme&utm_campaign=publisher)。0 基础 AI Agent / Vibe Coding 系列课、每周会员直播、答疑群都在这里
+- **想搭一个自己的知识付费站**：看我开源的 [mdldm-knowledge-kit](https://github.com/CzzzzzzJ/mdldm-knowledge-kit)
 - **Bug 和功能建议**：提 [GitHub Issue](https://github.com/CzzzzzzJ/mdldm-maitian-publisher/issues)
-- **课程合作、品牌合作、企业 AI 培训**：通过 [X / Twitter](https://x.com/czzzzzzJ_) 或 [个人联系页](https://www.mdldm.club/about) 联系，或在 B 站、小红书、抖音搜索 **麦当mdldm**
+- **课程合作、品牌合作、企业 AI 培训**：通过 [个人联系页](https://www.mdldm.club/about) 联系，或在 B 站、小红书、抖音搜索 **Howie**
 
 | 个人微信 |
 | --- |
-| <img src="docs/assets/wechat-personal.jpg" width="280" alt="麦当mdldm 个人微信二维码" /> |
+| <img src="docs/assets/wechat-personal.jpg" width="280" alt="Howie 个人微信二维码" /> |
 | 扫码添加，备注 `X长文插件` |
 
-如果这个插件帮你省了时间，欢迎点个 ⭐ Star，也欢迎在 X 上 [@czzzzzzJ_](https://x.com/czzzzzzJ_) 告诉我你用它发了什么。
+如果这个插件帮你省了时间，欢迎点个 ⭐ Star。
 
 ## License
 
-[Apache License 2.0](LICENSE)。Apache-2.0 不授予 `mdldm`、麦当名称或 Logo 的商标权。
+[Apache License 2.0](LICENSE)。Apache-2.0 不授予上游作者名称或 Logo 的商标权。

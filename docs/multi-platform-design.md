@@ -5,7 +5,7 @@
 
 ## 目标
 
-`mdldm-publish-assets` skill 产出一期的发布素材后，插件读取这一期的「发布包」，自动打开 6 个平台的上传页，依次上传视频和封面，填好标题、正文、标签和平台设置，**停在发布按钮前**，由人检查后手动点发布。
+`howieip-studio-publish-assets` skill 产出一期的发布素材后，插件读取这一期的「发布包」，自动打开 6 个平台的上传页，依次上传视频和封面，填好标题、正文、标签和平台设置，**停在发布按钮前**，由人检查后手动点发布。
 
 第一期平台：小红书、B 站、抖音、视频号、X、YouTube。
 
@@ -13,7 +13,7 @@
 
 ```
 成片 + 字幕
-  └─ mdldm-publish-assets skill
+  └─ howieip-studio-publish-assets skill
        ├─ {序号}_{主题}_发布素材.md     （人看的，保持现状）
        └─ {序号}_{主题}_发布包.json     （新增，给插件读）
                  │
@@ -136,7 +136,7 @@ export default {
 
 ## 需要配套修改的 skill
 
-`mdldm-publish-assets` 的改动：
+`howieip-studio-publish-assets` 的改动：
 
 1. 补写视频号、YouTube、X 三个平台的文案。
 2. 封面定稿后，复制到 NAS 工程目录的 `封面/`。

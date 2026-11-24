@@ -25,7 +25,7 @@ try { notify = (await import(join(HUB, 'src/feishu.mjs'))).notify; } catch {}
 async function waitFor(T, expr, ms, step = 1000) { const end = Date.now() + ms; while (Date.now() < end) { try { if (await evaluate(T, expr)) return true; } catch {} await sleep(step); } return false; }
 // 真实鼠标点击（X 不一定认 JS 的 el.click()，2026-11-14 第 4 期长文 Publish 就是这样没发出去）
 async function realClick(T, expr) { await clearOverlay(T, expr); const r = await rectOf(T, expr); if (!r) return false; await clickAt(T, r.x, r.y); return true; }
-// 别的插件（如 XHunt）会在 <html> 下挂一个透明的全屏层，挡住真实点击（2026-11-16 麦田开源期视频帖没点上）：
+// 别的插件（如 XHunt）会在 <html> 下挂一个透明的全屏层，挡住真实点击（2026-11-16 howieip-studio 开源期视频帖没点上）：
 // 按钮中心点命中的不是按钮本身时，把挡在上面的 html 顶层元素临时隐藏
 async function clearOverlay(T, expr) {
   return evaluate(T, `(()=>{const b=(${expr}); if(!b) return 0; const r=b.getBoundingClientRect(); let n=0;
@@ -83,7 +83,7 @@ try {
   const wait2 = AT - Date.now();
   if (wait2 > 0) { log(`等到 ${AT.toLocaleString('zh-CN')} 发布`); await sleep(wait2); }
 
-  let status = args['article-status'] || null, A = null, me = args.me || 'https://x.com/czzzzzzJ_';
+  let status = args['article-status'] || null, A = null, me = args.me || 'https://x.com/home';
   if (!status) {
   // ③ 发布长文（一次性锁：同一篇草稿只执行一次）
   const LOCK = join(HUB, 'state', `x-article-${args.draft.split('/').pop()}.lock`);
@@ -141,9 +141,9 @@ try {
   await call({ op: 'close', tabIds: [V] }).catch(() => {});
   const msg = `${args.label || 'X'}：长文 ${status}；视频帖 ${posted.url || '（主页上没找到，去看一眼）'}${posted.n > 1 ? `；⚠️ 视频帖出现了 ${posted.n} 条` : ''}`;
   log(msg); await notify(msg);
-  // 回写麦田：这一期的 X 标成已发布（--hub-id <麦田里的期 id>）
+  // 回写 howieip-studio：这一期的 X 标成已发布（--hub-id <howieip-studio 里的期 id>）
   if (args['hub-id'] && posted.url) {
-    try { (await import('node:child_process')).execFileSync(process.execPath, [join(HUB, 'src/hub.mjs'), 'mark', args['hub-id'], 'x', 'published', `长文 ${status}；视频帖引用长文`, '--url', posted.url], { stdio: 'ignore' }); } catch (e) { log('麦田没回写上：', e.message); }
+    try { (await import('node:child_process')).execFileSync(process.execPath, [join(HUB, 'src/hub.mjs'), 'mark', args['hub-id'], 'x', 'published', `长文 ${status}；视频帖引用长文`, '--url', posted.url], { stdio: 'ignore' }); } catch (e) { log('howieip-studio 没回写上：', e.message); }
   }
   process.exit(0);
 } catch (e) {

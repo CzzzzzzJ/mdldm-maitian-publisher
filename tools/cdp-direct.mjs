@@ -1,4 +1,4 @@
-// tools/cdp.mjs 的直连版：不走开发桥，直接连 --remote-debugging-port 启动的 Chrome（默认麦田专用 Chrome 9333）。
+// tools/cdp.mjs 的直连版：不走开发桥，直接连 --remote-debugging-port 启动的 Chrome（默认 howieip-studio egolite 9333）。
 // 用法：CDP_PORT=9333 node --import ./tools/direct-loader.mjs tools/<脚本>.mjs ...
 // tabId 是 Chrome 标签页 id（字符串，可用前缀）。
 const PORT = process.env.CDP_PORT || 9333;
