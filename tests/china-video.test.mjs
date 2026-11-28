@@ -38,6 +38,58 @@ test('A站立即发布用后台相对时间作关联证据，不编造精确发�
   assert.equal((await confirm([row], {title:'测试'}, new Date(row.earliest + 1).toISOString(), async()=>true)).url,'');
 });
 
+test('快手作品卡的审核或私密状态不被公开或已发布标签覆盖', async () => {
+  const links = ADAPTERS.kuaishou.links;
+  const title = '本期作品';
+  const time = '2026-11-28T12:00:00Z';
+  let privacy, state;
+  const visible = () => [1];
+  const row = {
+    getClientRects: visible,
+    get innerText() { return [title, privacy, state].join('\n'); },
+    __vue__: { $props: { videoInfo: { workId: 'test123' } } },
+    querySelector: s => s === '.video-item__detail__row__photoStatus' ? {innerText:privacy} : null,
+    querySelectorAll(s) {
+      if (s.includes('[class*=title]')) return [{innerText:title, getClientRects:visible}];
+      if (s === 'time[datetime]') return [{dateTime:time, getClientRects:visible}];
+      return [];
+    }
+  };
+  const document = {querySelectorAll: s => s === '.works-manage .video-item' ? [row] : []};
+  const page = vm.createContext({location:new URL(links.url), document});
+  Object.assign(chrome.debugger, {
+    attach: async () => {},
+    sendCommand: async (_tab, method, params) => method === 'Runtime.evaluate'
+      ? {result:{value:vm.runInContext(params.expression, page)}} : {}
+  });
+  for (const [visibility, lifecycle, status, url] of [
+    ['公开', '审核中', '审核中', ''],
+    ['公开', '审核失败', '已退回', ''],
+    ['仅自己可见', '已发布', '待核对', ''],
+    ['部分可见', '已发布', '待核对', ''],
+    ['所有人可见', '已发布', '已发布', 'https://www.kuaishou.com/short-video/test123'],
+    ['公开', '', '已发布', 'https://www.kuaishou.com/short-video/test123']
+  ]) {
+    privacy = visibility;
+    state = lifecycle;
+    const result = await links.collect(766, {caption:title}, {}, '2026-11-28T00:00:00Z');
+    assert.deepEqual([result.status, result.url], [status, url]);
+  }
+});
+
+test('A 站和快手没有可信的本期时间下限时，不自动回填同名的历史作品', () => {
+  for (const [id, field, url] of [
+    ['acfun', 'title', 'https://www.acfun.cn/v/ac123'],
+    ['kuaishou', 'caption', 'https://www.kuaishou.com/short-video/xyz123']
+  ]) {
+    const row = {title:'同名作品', status:'已发布', time:'2025-01-01T00:00:00Z', urls:[url]};
+    for (const cutoff of [undefined, 'not a date']) {
+      const result = ADAPTERS[id].links.match([row], {[field]:row.title}, cutoff);
+      assert.deepEqual([result.status, result.url], ['待核对', '']);
+    }
+  }
+});
+
 test('A 站稿件类型未选时默认原创，已有的转载不覆盖', () => {
   for (const initial of [null, '原创', '转载']) {
     let clicked = 0;
@@ -121,18 +173,17 @@ test('只回填唯一的公开作品，不把同名、审核中或后台地址�
     ['kuaishou', 'caption', 'https://www.kuaishou.com/short-video/xyz123']
   ]) {
     const match = ADAPTERS[id].links.match;
-    const row = { title: '本期作品', status: '已发布', urls: [url + '?foo=bar'] };
+    const row = { title: '本期作品', status: '已发布', time: '2026-11-27 14:00', urls: [url + '?foo=bar'] };
     const p = { [field]: '本期作品' };
-    assert.equal(match([row], p)?.url, url);
-    assert.ok(!match([row, row], p)?.url);
-    assert.ok(!match([{ ...row, status: '审核中' }], p)?.url);
-    assert.ok(!match([{ ...row, status: '审核通过' }], p)?.url);
-    assert.ok(!match([{ ...row, urls: [ADAPTERS[id].links.url] }], p)?.url);
-    assert.equal(match([{ ...row, title: '本期作品（重发）' }], p), null);
     const cutoff = '2026-11-27T13:00:00+08:00';
-    assert.ok(!match([row], p, cutoff)?.url);
+    assert.equal(match([row], p, cutoff)?.url, url);
+    assert.ok(!match([row, row], p, cutoff)?.url);
+    assert.ok(!match([{ ...row, status: '审核中' }], p, cutoff)?.url);
+    assert.ok(!match([{ ...row, status: '审核通过' }], p, cutoff)?.url);
+    assert.ok(!match([{ ...row, urls: [ADAPTERS[id].links.url] }], p, cutoff)?.url);
+    assert.equal(match([{ ...row, title: '本期作品（重发）' }], p, cutoff), null);
+    assert.ok(!match([{ ...row, time: '' }], p, cutoff)?.url);
     assert.ok(!match([{ ...row, time: '2026-11-27 12:00' }], p, cutoff)?.url);
-    assert.equal(match([{ ...row, time: '2026-11-27 14:00' }], p, cutoff)?.url, url);
   }
 });
 
