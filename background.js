@@ -4,13 +4,13 @@ import { run, preflight, collectLinks } from './lib/publish.js';
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
 
 const DONE = ['待你发布', '已填写', '跳过'];
-const BAD = ['异常', '上传超时', '已停止'];
+const BAD = ['异常', '上传超时', '已停止', '需人工补齐'];
 
 let job = null;   // { name, running, stop, states: { id: state }, startedAt, finishedAt }
 
 const snapshot = () => job && {
   name: job.name, running: job.running, startedAt: job.startedAt, finishedAt: job.finishedAt,
-  states: Object.values(job.states).map(s => ({ id: s.id, name: s.name, status: s.status, logs: s.logs, tabId: s.tabId })),
+  states: Object.values(job.states).map(s => ({ id: s.id, name: s.name, status: s.status, logs: s.logs, tabId: s.tabId, ...(s.review?.length ? { review: s.review } : {}) })),
 };
 
 // 工具栏图标：跑的时候显示「完成数/总数」，结束后 ✓ 或 !

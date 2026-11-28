@@ -21,6 +21,8 @@
     "https://studio.youtube.com/*",
     "https://www.youtube.com/*",
     "https://www.instagram.com/*",
+    "https://member.acfun.cn/*",
+    "https://cp.kuaishou.com/*",
     "https://www.mdldm.club/*",
     "http://localhost:8765/*",
     "http://127.0.0.1:8765/*"
